@@ -1,48 +1,64 @@
 const router = require('express').Router();
-const { Post } = require('../models/');
-const withAuth = require('../utils/auth');
+const { User } = require('../../models');
 
-router.get('/', withAuth, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const postData = await Post.findAll({
-      where: {
-        userId: req.session.userId,
-      },
+    const newUser = await User.create({
+      username: req.body.username,
+      password: req.body.password,
     });
 
-    const posts = postData.map((post) => post.get({ plain: true }));
+    req.session.save(() => {
+      req.session.userId = newUser.id;
+      req.session.username = newUser.username;
+      req.session.loggedIn = true;
 
-    res.render('all-posts-admin', {
-      layout: 'dashboard',
-      posts,
+      res.json(newUser);
     });
   } catch (err) {
-    res.redirect('login');
+    res.status(500).json(err);
   }
 });
 
-router.get('/new', withAuth, (req, res) => {
-  res.render('new-post', {
-    layout: 'dashboard',
-  });
+router.post('/login', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        username: req.body.username,
+      },
+    });
+
+    if (!user) {
+      res.status(400).json({ message: 'No account' });
+      return;
+    }
+
+    const validPassword = user.checkPassword(req.body.password);
+
+    if (!validPassword) {
+      res.status(400).json({ message: 'No account' });
+      return;
+    }
+
+    req.session.save(() => {
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      req.session.loggedIn = true;
+
+      res.json({ user, message: 'logged in' });
+    });
+  } catch (err) {
+    res.status(400).json({ message: 'No  account' });
+  }
 });
 
-router.get('/edit/:id', withAuth, async (req, res) => {
-  try {
-    const postData = await Post.findByPk(req.params.id);
-
-    if (postData) {
-      const post = postData.get({ plain: true });
-
-      res.render('edit-post', {
-        layout: 'dashboard',
-        post,
-      });
-    } else {
-      res.status(404).end();
-    }
-  } catch (err) {
-    res.redirect('login');
+router.post('/logout', (req, res) => {
+  if (req.session.loggedIn) {
+    req.session.destroy(() => {
+      res.status(204).end();
+    });
+  } else {
+    res.status(404).end();
   }
 });
 
