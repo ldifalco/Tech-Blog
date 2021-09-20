@@ -1,52 +1,16 @@
 const router = require('express').Router();
-const Comment = require('../..models/comment');
+const { Comment } = require('../../models/');
+const withAuth = require('../../utils/auth');
 
-router.post('/', async (req, res) => {
+router.post('/', withAuth, async (req, res) => {
     try {
         const commentData = await Comment.create({
-            title: req.body.title,
-            content: req.body.content,
-            user_id: req.body.user_id,
-            post_id: req.body.post_id
+         ...req.body,
+         userId: req.session.userId,
         });
-
         res.status(200).json(commentData);
     } catch (err) {
-        console.log(err);
-        res.status(500);
-    }
-});
-
-router.put('/:id', async (req, res) => {
-    try {
-        const commentData = await Post.update(
-            {
-                title: req.body.title,
-                content: req.body.content
-            },
-            {
-                where: {
-                    id: req.params.id
-                }
-            }
-        )
-
-        res.status(200).json(commentData);
-    } catch {
-        console.log(err);
-        res.status(500);
-    }
-});
-
-router.delete(':/id', async (req, res) => {
-    try {
-        const commentData = await Post.findByPk(req.params.id);
-
-        await commentData.destroy();
-        res.status(200).json({ message: 'Comment has been deleted' });
-    } catch {
-        console.log (err);
-        res.status(500);
+        res.status(500).json(err);
     }
 });
 
