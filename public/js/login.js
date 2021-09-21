@@ -1,6 +1,6 @@
 const loginFormHandler = async function(event) {
   event.preventDefault();
-
+  console.log("listener triggered")
   const usernameEl = document.querySelector('#username-input-login');
   const passwordEl = document.querySelector('#password-input-login');
 
@@ -12,6 +12,9 @@ const loginFormHandler = async function(event) {
     }),
     headers: { 'Content-Type': 'application/json' },
   });
+  console.log(response)
+
+
 
   if (response.ok) {
     document.location.replace('/dashboard');
@@ -23,3 +26,4 @@ const loginFormHandler = async function(event) {
 document
   .querySelector('#login-form')
   .addEventListener('submit', loginFormHandler);
+
