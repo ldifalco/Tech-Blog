@@ -6,7 +6,7 @@ My first full stack application
 
 
 #Deployed Link
-https://shrouded-shore-90952.herokuapp.com/post/1
+https://shrouded-shore-90952.herokuapp.com
 
 
 #Installation
