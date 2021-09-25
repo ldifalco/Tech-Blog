@@ -1,7 +1,7 @@
 # Tech Blog License: MIT
 
 # Description
-My first full stack application 
+My first full stack application, allowing users to post and save blog posts as well as comment and edit.
 
 
 
